@@ -1,1 +1,0 @@
-# PAP-graphic-card
