@@ -60,11 +60,11 @@ __kernel void scrollup (__global unsigned *in, __global unsigned *out)
 __kernel void sable (__global unsigned *in, __global unsigned *out, __global int* diff)
 {
   //local int tmpReduction[get_local_size(0)*get_local_size(1)];//strat: calcul sum of the workgroup using memory protection, then reductiong all workgroups into global diff
-  local int diffSum;//0 inchallah
+  local int diffSum;
   int x = get_global_id (0)+1;
   int y = get_global_id (1)+1;
   int current = y*DIM+x;
-
+diffSum=0;
 //Avoid divergency, we gotta ensure that borders are 0, other wise this do not work
   out[current] = in[current]%4;
   out[current]+= in[current+1]/4; 
@@ -74,7 +74,9 @@ __kernel void sable (__global unsigned *in, __global unsigned *out, __global int
 //again, different versions (trying to avoid divergency) 
 /*V1*/
 ///*
-   atomic_add(diff,out[current]-in[current]);
+    atomic_add(diff,abs_diff(out[current],in[current]));
+    
+
 //*/
 /*V2 this do not work, need synchronization*/
 /*
@@ -87,11 +89,10 @@ if (out[current]-in[current]!=0)
 */
 /*V4 less access to global memory*/
 /*
-atomic_add(&diffSum, out[current]-in[current]);
+atomic_add(&diffSum,abs_diff(out[current],in[current]));
 barrier(CLK_LOCAL_MEM_FENCE);
-if(get_local_id(0)==0 && get_local_id(1)==0){
-    atomic_add(diff, diffSum);
-}
+if (x==0 && y==0)
+    atomic_add(diff,diffSum);//no problem
 */
 
 }

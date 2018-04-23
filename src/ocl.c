@@ -309,9 +309,10 @@ bool ocl_compute (unsigned nb_iter)
 {
   size_t global[2] = { SIZE-2, SIZE-2 };  // global domain size for our calculation
   //size_t local[2]  = { TILEX, TILEY };  // local domain size for our calculation
-  int diff=0;
+  int diff;
   
   for (unsigned it = 1; it <= nb_iter; it ++) {
+      diff=0;
       err = clEnqueueWriteBuffer (queue, diffCounter, CL_TRUE, 0,
 			      sizeof ( int), &diff, 0, NULL, NULL);  
     // Set kernel arguments
