@@ -73,11 +73,11 @@ diffSum=0;
   out[current]+= in[current-DIM]/4;
 //again, different versions (trying to avoid divergency) 
 /*V1*/
-///*
+/*
     atomic_add(diff,abs_diff(out[current],in[current]));
     
 
-//*/
+*/
 /*V2 this do not work, need synchronization*/
 /*
 diff+= out[current]-in[current];
@@ -87,13 +87,13 @@ diff+= out[current]-in[current];
 if (out[current]-in[current]!=0)    
     diff=1;
 */
-/*V4 less access to global memory*/
-/*
+/*V4 less access to global memory, betterSpeedUp*/
+///*
 atomic_add(&diffSum,abs_diff(out[current],in[current]));
 barrier(CLK_LOCAL_MEM_FENCE);
-if (x==0 && y==0)
+if (get_local_id(0)==0 && get_local_id(1)==0)
     atomic_add(diff,diffSum);//no problem
-*/
+//*/
 
 }
 
