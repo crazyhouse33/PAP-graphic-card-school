@@ -75,21 +75,21 @@ diffSum=0;
   out[current]+= in[current-DIM]/4;
 //again, different versions (trying to avoid divergency) 
 /*V1*/
-///*
+/*
     atomic_add(diff,abs_diff(out[current],in[current]));
     
 
-//*/
+*/
 /*V2 this do not work, need synchronization*/
 /*
-diff+= out[current]-in[current];
+diff+= abs_diff(out[current],in[current]);
 */
-/*V3 idem, dont work without atomic*/
-/*
+/*V3 best and simpliest version*/
+//*
 if (out[current]-in[current]!=0)    
-    diff=1;
-*/
-/*V4 less access to global memory, betterSpeedUp*/
+    atomic_inc(diff);
+//*/
+/*V4 less access to global memory*/
 /*
 atomic_add(&diffSum,abs_diff(out[current],in[current]));
 barrier(CLK_LOCAL_MEM_FENCE);
@@ -97,12 +97,12 @@ if (xloc==0 && yloc==0)
     atomic_add(diff,diffSum);
 */
 
-/*V5 v4 but getting rect of some atomic*/
+/*V5 v4 but getting rect of atomic, a lot slower*/
 /*
 tmpReduction[xloc][yloc]=abs_diff(out[current],in[current]);
-barrier(CLK_LOCAL_MEM_FENCE);
 int i;
 int j;
+barrier(CLK_LOCAL_MEM_FENCE);
 if (xloc==0 && yloc==0){
     for (i=0; i<TILEX ; i++){
         for (j=0; j<TILEY ; j++){

@@ -322,9 +322,9 @@ bool ocl_compute (unsigned nb_iter)
     err |= clSetKernelArg (compute_kernel, 2, sizeof (cl_mem), &diffCounter);
     check (err, "Failed to set kernel arguments");
 
-    err = clEnqueueNDRangeKernel (queue, compute_kernel, 2, NULL, NULL, NULL,
+    err = clEnqueueNDRangeKernel (queue, compute_kernel, 2, NULL, global, local,
 				  0, NULL, NULL);
-    check (err, "Failed to execute kernel");
+        check (err, "Failed to execute kernel");
     err = clEnqueueReadBuffer (queue, diffCounter, CL_TRUE, 0,
 			      sizeof (int), &diff, 0, NULL, NULL);
 
@@ -351,7 +351,7 @@ void ocl_wait (void)
 
 void ocl_update_texture (void)
 {
-  size_t global[2] = { DIM, DIM };  // global domain size for our calculation
+  size_t global[2] = { DIM-2, DIM-2 };  // global domain size for our calculation
   size_t local[2]  = { 16, 16 };  // local domain size for our calculation
 
   ocl_acquire ();

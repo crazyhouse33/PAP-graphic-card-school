@@ -1,2 +1,3 @@
 //cmd line:
-PLATFORM=1 ./prog -o -k sable -s 256 -p 4partout -v sable -p alea -n
+PLATFORM=1 ./prog -o -k sable -s 258 -p 4partout -v sable -p alea -n
+La taille doit etre de la forme 2^n +2
