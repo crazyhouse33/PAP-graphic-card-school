@@ -308,7 +308,7 @@ void ocl_send_image (unsigned *image)
 bool ocl_compute (unsigned nb_iter)
 {
   size_t global[2] = { SIZE-2, SIZE-2 };  // global domain size for our calculation
-  //size_t local[2]  = { TILEX, TILEY };  // local domain size for our calculation
+  size_t local[2]  = { TILEX, TILEY };  // local domain size for our calculation
   int diff;
   
   for (unsigned it = 1; it <= nb_iter; it ++) {
@@ -322,7 +322,7 @@ bool ocl_compute (unsigned nb_iter)
     err |= clSetKernelArg (compute_kernel, 2, sizeof (cl_mem), &diffCounter);
     check (err, "Failed to set kernel arguments");
 
-    err = clEnqueueNDRangeKernel (queue, compute_kernel, 2, NULL, global, NULL,
+    err = clEnqueueNDRangeKernel (queue, compute_kernel, 2, NULL, NULL, NULL,
 				  0, NULL, NULL);
     check (err, "Failed to execute kernel");
     err = clEnqueueReadBuffer (queue, diffCounter, CL_TRUE, 0,

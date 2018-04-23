@@ -59,10 +59,12 @@ __kernel void scrollup (__global unsigned *in, __global unsigned *out)
 
 __kernel void sable (__global unsigned *in, __global unsigned *out, __global int* diff)
 {
-  //local int tmpReduction[get_local_size(0)*get_local_size(1)];//strat: calcul sum of the workgroup using memory protection, then reductiong all workgroups into global diff
+  local int tmpReduction[TILEX][TILEY];//strat: calcul sum of the workgroup using memory protection, then reductiong all workgroups into global diff
   local int diffSum;
   int x = get_global_id (0)+1;
   int y = get_global_id (1)+1;
+int xloc=get_local_id(0);
+int yloc=get_local_id(1);
   int current = y*DIM+x;
 diffSum=0;
 //Avoid divergency, we gotta ensure that borders are 0, other wise this do not work
@@ -73,11 +75,11 @@ diffSum=0;
   out[current]+= in[current-DIM]/4;
 //again, different versions (trying to avoid divergency) 
 /*V1*/
-/*
+///*
     atomic_add(diff,abs_diff(out[current],in[current]));
     
 
-*/
+//*/
 /*V2 this do not work, need synchronization*/
 /*
 diff+= out[current]-in[current];
@@ -88,12 +90,27 @@ if (out[current]-in[current]!=0)
     diff=1;
 */
 /*V4 less access to global memory, betterSpeedUp*/
-///*
+/*
 atomic_add(&diffSum,abs_diff(out[current],in[current]));
 barrier(CLK_LOCAL_MEM_FENCE);
-if (get_local_id(0)==0 && get_local_id(1)==0)
-    atomic_add(diff,diffSum);//no problem
-//*/
+if (xloc==0 && yloc==0)
+    atomic_add(diff,diffSum);
+*/
+
+/*V5 v4 but getting rect of some atomic*/
+/*
+tmpReduction[xloc][yloc]=abs_diff(out[current],in[current]);
+barrier(CLK_LOCAL_MEM_FENCE);
+int i;
+int j;
+if (xloc==0 && yloc==0){
+    for (i=0; i<TILEX ; i++){
+        for (j=0; j<TILEY ; j++){
+            atomic_add(diff,tmpReduction[i][j]);
+        }
+    }
+}
+*/
 
 }
 
